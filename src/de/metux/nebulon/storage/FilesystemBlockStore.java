@@ -73,7 +73,7 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 		String filename = getBlockPathname(score);
 		FileIO.createFilePath(filename);
 		String tmpname = filename+".tmp";
-		File tmpfile = new File(filename);
+		File tmpfile = new File(tmpname);
 		tmpfile.delete();
 
 		try {
@@ -89,7 +89,12 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			return false;
 		}
 
-		return tmpfile.renameTo(new File(filename));
+		if (tmpfile.renameTo(new File(filename))) {
+			return true;
+		} else {
+			System.err.println("FilesystemBlockStore: failed to rename: "+tmpfile+" => "+filename);
+			return false;
+		}
 	}
 
 	/* delete a block */
