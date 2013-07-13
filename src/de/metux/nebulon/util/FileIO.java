@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.File;
+import java.util.Formatter;
 
 public class FileIO {
 	public static boolean createFilePath(String filename) {
@@ -36,5 +37,13 @@ public class FileIO {
 		} catch (IOException ex) {
 		}
 		return null;
+	}
+
+	public static String byteArray2Hex(final byte[] hash) {
+		Formatter formatter = new Formatter();
+		for (byte b : hash) {
+			formatter.format("%02x", b);
+		}
+		return formatter.toString();
 	}
 }
