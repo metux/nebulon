@@ -9,10 +9,10 @@ public class nbtest {
 
 	public static void main(String argv[]) throws IOException {
 		String filename = "Makefile";
-		String testhash = "7062b195a6d9b533690b1e100d74d379";
-		Score score = new Score("MD5", testhash);
-		FilesystemBlockStore bs = new FilesystemBlockStore("./data", true);
-		bs.storeBlock(score, FileIO.loadBinaryFile(filename));
+		BlockStore bs = new BlockStore(new FilesystemBlockStore("./data", true));
+		Score score = bs.storeBlock(FileIO.loadBinaryFile(filename));
+
+		System.out.println("SCORE: "+score);
 
 		BlockInfo inf = bs.getBlock(score);
 		if (inf == null)

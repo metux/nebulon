@@ -51,16 +51,10 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 		/* first try raw block */
 		BlockInfo inf = getBlock_raw(score);
 		if (inf != null) {
-			System.err.println("Raw block found: "+score);
 			return inf;
 		}
 
-		System.err.println("Raw block not found ... trying gzip: "+score);
-		inf = getBlock_gzip(score);
-		if (inf == null) {
-			System.err.println("Gzip block not found: "+score);
-		}
-		return inf;
+		return getBlock_gzip(score);
 	}
 
 	/* get a data block -- including payload */
@@ -75,7 +69,6 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			inf.score = score;
 			return inf;
 		} catch (FileNotFoundException e) {
-			System.err.println("FilesystemBlockStore: requested block not found: "+score);
 			return null;
 		} catch (IOException e) {
 			System.err.println("FilesystemBlockStore: IO error for block "+score+": "+e);
@@ -93,7 +86,6 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			inf.score = score;
 			return inf;
 		} catch (FileNotFoundException e) {
-			System.err.println("FilesystemBlockStore: requested block not found: "+score);
 			return null;
 		} catch (IOException e) {
 			System.err.println("FilesystemBlockStore: IO error for block "+score+": "+e);
@@ -112,7 +104,6 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			os.flush();
 			os.close();
 		} catch (FileNotFoundException e) {
-			System.err.println("FilesystemBlockStore::storeBlock_gzip() failed to open file: "+tmpname);
 			return false;
 		} catch (IOException e) {
 			System.err.println("IOException for file: "+tmpname);

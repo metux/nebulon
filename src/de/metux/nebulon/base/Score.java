@@ -1,5 +1,7 @@
 package de.metux.nebulon.base;
 
+import de.metux.nebulon.util.FileIO;
+
 public class Score {
 
 	public String keytype;
@@ -12,5 +14,9 @@ public class Score {
 
 	public String toString() {
 		return ((keytype==null)?"":keytype)+":"+((key==null)?"":key);
+	}
+
+	public static Score getSHA256Score(byte[] data) {
+		return new Score("SHA256", FileIO.SHA256sumHex(data));
 	}
 }
