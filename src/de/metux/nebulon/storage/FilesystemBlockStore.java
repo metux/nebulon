@@ -1,21 +1,26 @@
 package de.metux.nebulon.storage;
 
+import de.metux.nebulon.base.BlockInfo;
 import de.metux.nebulon.base.IBasicBlockStore;
 import de.metux.nebulon.base.Score;
-import de.metux.nebulon.base.BlockInfo;
 import de.metux.nebulon.util.FileIO;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
-import java.nio.channels.FileChannel;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.GZIPInputStream;
 
 public class FilesystemBlockStore implements IBasicBlockStore {
 
 	public String root;
+	public boolean compress;
 
-	public FilesystemBlockStore(String r) {
+	public FilesystemBlockStore(String r, boolean c) {
 		root = r;
+		compress = c;
 	}
 
 	public String getBlockPathname(Score score) {
@@ -30,13 +35,42 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 		return path+"/"+s2+".bin";
 	}
 
-	/* get a data block -- including payload */
+	public String getGZipBlockPathname(Score score) {
+		String path = root+"/"+score.keytype;
+		String s2 = score.key;
+
+		while (s2.length() > 4) {
+			path += "/"+s2.substring(0,3);
+			s2 = s2.substring(4);
+		}
+
+		return path+"/"+s2+".gz";
+	}
+
 	public BlockInfo getBlock(Score score) {
+		/* first try raw block */
+		BlockInfo inf = getBlock_raw(score);
+		if (inf != null) {
+			System.err.println("Raw block found: "+score);
+			return inf;
+		}
+
+		System.err.println("Raw block not found ... trying gzip: "+score);
+		inf = getBlock_gzip(score);
+		if (inf == null) {
+			System.err.println("Gzip block not found: "+score);
+		}
+		return inf;
+	}
+
+	/* get a data block -- including payload */
+	public BlockInfo getBlock_raw(Score score) {
 		try {
 			BlockInfo inf = new BlockInfo();
 			RandomAccessFile f = new RandomAccessFile(getBlockPathname(score), "r");
-			inf.data = f.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			inf.size = f.length();
+			inf.size = (int)f.length();
+			inf.data = new byte[inf.size];
+			f.readFully(inf.data);
 			inf.encoding = "raw";
 			inf.score = score;
 			return inf;
@@ -49,14 +83,13 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 		}
 	}
 
-	/* get block metadata -- w/o payload */
-	public BlockInfo statBlock(Score score) {
+	/* get a data block -- including payload */
+	public BlockInfo getBlock_gzip(Score score) {
 		try {
 			BlockInfo inf = new BlockInfo();
-			RandomAccessFile f = new RandomAccessFile(getBlockPathname(score), "r");
-			inf.data = null;
-			inf.size = f.length();
-			inf.encoding = "raw";
+			inf.data = FileIO.readBytes(new GZIPInputStream(new FileInputStream(getGZipBlockPathname(score))));
+			inf.size = inf.data.length;
+			inf.encoding = "gzip";
 			inf.score = score;
 			return inf;
 		} catch (FileNotFoundException e) {
@@ -65,11 +98,37 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 		} catch (IOException e) {
 			System.err.println("FilesystemBlockStore: IO error for block "+score+": "+e);
 			return null;
+		}
+	}
+
+	public boolean storeBlock_gzip(Score score, byte[] content) {
+		String filename = getGZipBlockPathname(score);
+		String tmpname = filename+".tmp";
+		FileIO.createFilePath(filename);
+
+		try {
+			GZIPOutputStream os = new GZIPOutputStream(new FileOutputStream(tmpname));
+			os.write(content);
+			os.flush();
+			os.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("FilesystemBlockStore::storeBlock_gzip() failed to open file: "+tmpname);
+			return false;
+		} catch (IOException e) {
+			System.err.println("IOException for file: "+tmpname);
+			return false;
+		}
+
+		if (new File(tmpname).renameTo(new File(filename))) {
+			return true;
+		} else {
+			System.err.println("FilesystemBlockStore: failed to rename: "+tmpname+" => "+filename);
+			return false;
 		}
 	}
 
 	/* store a block with associated data - no key generation/checking */
-	public boolean storeBlock(Score score, byte[] content) {
+	public boolean storeBlock_raw(Score score, byte[] content) {
 		String filename = getBlockPathname(score);
 		FileIO.createFilePath(filename);
 		String tmpname = filename+".tmp";
@@ -95,6 +154,13 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			System.err.println("FilesystemBlockStore: failed to rename: "+tmpfile+" => "+filename);
 			return false;
 		}
+	}
+
+	public boolean storeBlock(Score score, byte[] content) {
+		if (compress)
+			return storeBlock_gzip(score, content);
+		else
+			return storeBlock_raw(score, content);
 	}
 
 	/* delete a block */

@@ -9,9 +9,6 @@ public interface IBasicBlockStore {
 	/* get a data block -- including payload */
 	public BlockInfo getBlock(Score k);
 
-	/* get block metadata -- w/o payload */
-	public BlockInfo statBlock(Score k);
-
 	/* store a block with associated data - no key generation/checking */
 	public boolean storeBlock(Score k, byte[] content);
 
