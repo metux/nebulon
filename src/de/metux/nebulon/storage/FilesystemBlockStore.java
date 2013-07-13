@@ -3,11 +3,12 @@ package de.metux.nebulon.storage;
 import de.metux.nebulon.base.IBasicBlockStore;
 import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.BlockInfo;
-import java.io.RandomAccessFile;
+import de.metux.nebulon.util.FileIO;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.io.File;
 
 public class FilesystemBlockStore implements IBasicBlockStore {
 
@@ -70,12 +71,13 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 	/* store a block with associated data - no key generation/checking */
 	public boolean storeBlock(Score score, byte[] content) {
 		String filename = getBlockPathname(score);
+		FileIO.createFilePath(filename);
 		String tmpname = filename+".tmp";
 		File tmpfile = new File(filename);
 		tmpfile.delete();
 
 		try {
-			RandomAccessFile f = new RandomAccessFile(tmpname, "w");
+			RandomAccessFile f = new RandomAccessFile(tmpname, "rw");
 			f.write(content);
 			f.close();
 		} catch (FileNotFoundException e) {
