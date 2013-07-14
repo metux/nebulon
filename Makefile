@@ -37,3 +37,4 @@ install:	$(EXECUTABLE)
 
 test:	$(EXECUTABLE)
 	./$(EXECUTABLE)
+

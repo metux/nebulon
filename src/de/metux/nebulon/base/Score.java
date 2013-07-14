@@ -5,18 +5,18 @@ import de.metux.nebulon.util.FileIO;
 public class Score {
 
 	public String keytype;
-	public String key;
+	public byte[] key;
 
-	public Score(String kt, String k) {
+	public Score(String kt, byte[] k) {
 		keytype = kt;
 		key = k;
 	}
 
 	public String toString() {
-		return ((keytype==null)?"":keytype)+":"+((key==null)?"":key);
+		return ((keytype==null)?"":keytype)+":"+((key==null)?"":FileIO.byteArray2Hex(key));
 	}
 
 	public static Score getSHA256Score(byte[] data) {
-		return new Score("SHA256", FileIO.SHA256sumHex(data));
+		return new Score("SHA256", FileIO.SHA256sum(data));
 	}
 }

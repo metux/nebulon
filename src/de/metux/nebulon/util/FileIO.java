@@ -53,6 +53,7 @@ public class FileIO {
 	}
 
 	public static byte[] SHA256sum(byte[] convertme) {
+		System.err.println("SHA256sum: size="+convertme.length);
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
 			return md.digest(convertme);

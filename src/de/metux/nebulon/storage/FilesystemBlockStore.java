@@ -25,7 +25,7 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 
 	public String getBlockPathname(Score score) {
 		String path = root+"/"+score.keytype;
-		String s2 = score.key;
+		String s2 = FileIO.byteArray2Hex(score.key);
 
 		while (s2.length() > 4) {
 			path += "/"+s2.substring(0,3);
@@ -37,7 +37,7 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 
 	public String getGZipBlockPathname(Score score) {
 		String path = root+"/"+score.keytype;
-		String s2 = score.key;
+		String s2 = FileIO.byteArray2Hex(score.key);
 
 		while (s2.length() > 4) {
 			path += "/"+s2.substring(0,3);

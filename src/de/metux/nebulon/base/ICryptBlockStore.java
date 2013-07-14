@@ -1,13 +1,13 @@
 package de.metux.nebulon.base;
 
-public interface IBlockStore {
+public interface ICryptBlockStore {
 
 	/* get a data block -- including payload */
-	public byte[] getBlock(Score k);
+	public byte[] get(CryptScore score);
 
 	/* store a block with associated data, including score/key generation */
-	public Score storeBlock(byte[] content);
+	public CryptScore put(byte[] content);
 
 	/* delete a block */
-	public boolean deleteBlock(Score k);
+	public boolean delete(CryptScore k);
 }

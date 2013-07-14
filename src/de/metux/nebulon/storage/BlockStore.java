@@ -18,8 +18,12 @@ public class BlockStore implements IBlockStore {
 	}
 
 	/* get a data block -- including payload */
-	public BlockInfo getBlock(Score k) {
-		return store.getBlock(k);
+	public byte[] getBlock(Score k) {
+		BlockInfo inf = store.getBlock(k);
+		if (inf == null)
+			return null;
+		else
+			return inf.data;
 	}
 
 	/* store a block with associated data, including score/key generation */
