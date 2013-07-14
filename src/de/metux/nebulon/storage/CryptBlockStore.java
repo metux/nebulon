@@ -10,7 +10,7 @@ import javax.crypto.BadPaddingException;
 
 public class CryptBlockStore implements ICryptBlockStore {
 
-	private static final String ciphertype = "Blowfish/ECB/PKCS5Padding";
+	private static final String default_ciphertype = "Blowfish/ECB/PKCS5Padding";
 
 	IBlockStore blockstore;
 
@@ -22,64 +22,66 @@ public class CryptBlockStore implements ICryptBlockStore {
 		return blockstore.deleteBlock(score.score);
 	}
 
-	public byte[] encrypt(byte[] key, byte[] data) {
-		try {
-			SecretKeySpec ks = new SecretKeySpec(key, ciphertype);
-			Cipher cipher = Cipher.getInstance(ciphertype);
-			cipher.init(Cipher.ENCRYPT_MODE, ks);
-			return cipher.doFinal(data);
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println("encrypt: No such algorithm: "+ciphertype+" ==> "+e);
-			return null;
-		} catch (NoSuchPaddingException e) {
-			System.err.println("encrypt: padding exception ==> "+e);
-			return null;
-		} catch (InvalidKeyException e) {
-			System.err.println("encrypt: invalid key exception ==> "+e);
-			return null;
-		} catch (IllegalBlockSizeException e) {
-			System.err.println("encrypt: illegal block size exception ==> "+e);
-			return null;
-		} catch (BadPaddingException e) {
-			System.err.println("encrypt: illegal block size exception ==> "+e);
-			return null;
-		}
-	}
-
-	public byte[] decrypt(byte[] key, byte[] data) {
-		try {
-			SecretKeySpec ks = new SecretKeySpec(key, ciphertype);
-			Cipher cipher = Cipher.getInstance(ciphertype);
-			cipher.init(Cipher.DECRYPT_MODE, ks);
-			return cipher.doFinal(data);
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println("decrypt: No such algorithm: "+ciphertype+" ==> "+e);
-			return null;
-		} catch (NoSuchPaddingException e) {
-			System.err.println("decrypt: padding exception ==> "+e);
-			return null;
-		} catch (InvalidKeyException e) {
-			System.err.println("decrypt: invalid key exception ==> "+e);
-			return null;
-		} catch (IllegalBlockSizeException e) {
-			System.err.println("decrypt: illegal block size exception ==> "+e);
-			return null;
-		} catch (BadPaddingException e) {
-			System.err.println("decrypt: illegal block size exception ==> "+e);
-			return null;
-		}
-	}
-
 	public CryptScore put(byte[] data) {
+		return put(data, default_ciphertype);
+	}
+
+	public CryptScore put(byte[] data, String ciphertype) {
 		CryptScore cs = new CryptScore();
 		cs.cipher = ciphertype;
 		cs.key = Score.getSHA256Score(data).key; // the inner score is our cipher key
-		cs.score = blockstore.storeBlock(encrypt(cs.key, data));
-		return cs;
+
+		try {
+			SecretKeySpec ks = new SecretKeySpec(cs.key, ciphertype);
+			Cipher cipher = Cipher.getInstance(ciphertype);
+			cipher.init(Cipher.ENCRYPT_MODE, ks);
+			cs.score = blockstore.storeBlock(cipher.doFinal(data));
+			return cs;
+		} catch (NoSuchAlgorithmException e) {
+			Log.err("CryptStore::put() No such algorithm: "+ciphertype, e);
+			return null;
+		} catch (NoSuchPaddingException e) {
+			Log.err("CryptStore::put() padding exception", e);
+			return null;
+		} catch (InvalidKeyException e) {
+			Log.err("CryptStore::put() invalid key exception", e);
+			return null;
+		} catch (IllegalBlockSizeException e) {
+			Log.err("CryptStore::put() illegal block size exception", e);
+			return null;
+		} catch (BadPaddingException e) {
+			Log.err("CryptStore::put(): illegal block size exception", e);
+			return null;
+		}
 	}
 
 	public byte[] get(CryptScore score) {
 		byte[] crypted = blockstore.getBlock(score.score);
-		return decrypt(score.key, crypted);
+		if (crypted == null) {
+			Log.info("CryptBlockStore::get() crypted block not found: "+score.score);
+			return null;
+		}
+
+		try {
+			SecretKeySpec ks = new SecretKeySpec(score.key, score.cipher);
+			Cipher cipher = Cipher.getInstance(score.cipher);
+			cipher.init(Cipher.DECRYPT_MODE, ks);
+			return cipher.doFinal(crypted);
+		} catch (NoSuchAlgorithmException e) {
+			Log.info("CryptBlockStore::get() No such algorithm: "+score.cipher, e);
+			return null;
+		} catch (NoSuchPaddingException e) {
+			Log.info("CryptBlockStore::get() padding exception", e);
+			return null;
+		} catch (InvalidKeyException e) {
+			Log.info("CryptBlockStore::get() invalid key exception", e);
+			return null;
+		} catch (IllegalBlockSizeException e) {
+			Log.info("CryptBlockStore::get() illegal block size exception", e);
+			return null;
+		} catch (BadPaddingException e) {
+			Log.info("CryptBlockStore::get() illegal block size exception", e);
+			return null;
+		}
 	}
 }
