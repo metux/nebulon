@@ -1,4 +1,4 @@
-package de.metux.nebulon.storage;
+package de.metux.nebulon.store;
 
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.Score;
