@@ -1,13 +1,10 @@
 package de.metux.nebulon.base;
 
+import java.io.IOException;
+
 public interface IBlockStore {
 
-	/* get a data block -- including payload */
-	public byte[] getBlock(Score k);
-
-	/* store a block with associated data, including score/key generation */
-	public Score storeBlock(byte[] content);
-
-	/* delete a block */
-	public boolean deleteBlock(Score k);
+	public byte[] get(Score score) throws IOException;
+	public Score put(byte[] data) throws IOException;
+	public boolean delete(Score score) throws IOException;
 }

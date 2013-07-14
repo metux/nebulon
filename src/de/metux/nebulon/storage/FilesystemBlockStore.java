@@ -1,7 +1,6 @@
 package de.metux.nebulon.storage;
 
-import de.metux.nebulon.base.BlockInfo;
-import de.metux.nebulon.base.IBasicBlockStore;
+import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.Score;
 import de.metux.nebulon.util.FileIO;
 import java.io.IOException;
@@ -13,17 +12,17 @@ import java.io.RandomAccessFile;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
 
-public class FilesystemBlockStore implements IBasicBlockStore {
+public class FilesystemBlockStore implements IBlockStore {
 
-	public String root;
-	public boolean compress;
+	private String root;
+	private boolean compress;
 
 	public FilesystemBlockStore(String r, boolean c) {
 		root = r;
 		compress = c;
 	}
 
-	public String getBlockPathname(Score score) {
+	private String _blockpath(Score score) {
 		String path = root+"/"+score.keytype;
 		String s2 = FileIO.byteArray2Hex(score.key);
 
@@ -32,94 +31,69 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			s2 = s2.substring(4);
 		}
 
-		return path+"/"+s2+".bin";
+		return path+"/"+s2;
 	}
 
-	public String getGZipBlockPathname(Score score) {
-		String path = root+"/"+score.keytype;
-		String s2 = FileIO.byteArray2Hex(score.key);
-
-		while (s2.length() > 4) {
-			path += "/"+s2.substring(0,3);
-			s2 = s2.substring(4);
-		}
-
-		return path+"/"+s2+".gz";
+	private String getGZipBlockPathname(Score score) {
+		return _blockpath(score)+".gz";
 	}
 
-	public BlockInfo getBlock(Score score) {
-		/* first try raw block */
-		BlockInfo inf = getBlock_raw(score);
-		if (inf != null) {
-			return inf;
-		}
+	private String getBlockPathname(Score score) {
+		return _blockpath(score)+".bin";
+	}
 
-		return getBlock_gzip(score);
+	public byte[] get(Score score) throws IOException {
+		byte[] data = get_raw(score);
+		return ((data == null) ? get_gzip(score) : data);
 	}
 
 	/* get a data block -- including payload */
-	public BlockInfo getBlock_raw(Score score) {
+	private byte[] get_raw(Score score) throws IOException {
 		try {
-			BlockInfo inf = new BlockInfo();
 			RandomAccessFile f = new RandomAccessFile(getBlockPathname(score), "r");
-			inf.size = (int)f.length();
-			inf.data = new byte[inf.size];
-			f.readFully(inf.data);
-			inf.encoding = "raw";
-			inf.score = score;
-			return inf;
+			byte[] buffer = new byte[(int)f.length()];
+			f.readFully(buffer);
+			return buffer;
 		} catch (FileNotFoundException e) {
-			return null;
-		} catch (IOException e) {
-			System.err.println("FilesystemBlockStore: IO error for block "+score+": "+e);
 			return null;
 		}
 	}
 
 	/* get a data block -- including payload */
-	public BlockInfo getBlock_gzip(Score score) {
+	private byte[] get_gzip(Score score) throws IOException {
 		try {
-			BlockInfo inf = new BlockInfo();
-			inf.data = FileIO.readBytes(new GZIPInputStream(new FileInputStream(getGZipBlockPathname(score))));
-			inf.size = inf.data.length;
-			inf.encoding = "gzip";
-			inf.score = score;
-			return inf;
+			return FileIO.readBytes(new GZIPInputStream(new FileInputStream(getGZipBlockPathname(score))));
 		} catch (FileNotFoundException e) {
-			return null;
-		} catch (IOException e) {
-			System.err.println("FilesystemBlockStore: IO error for block "+score+": "+e);
 			return null;
 		}
 	}
 
-	public boolean storeBlock_gzip(Score score, byte[] content) {
+	private Score put_gzip(byte[] content) throws IOException {
+		Score score = Score.compute(content);
 		String filename = getGZipBlockPathname(score);
 		String tmpname = filename+".tmp";
 		FileIO.createFilePath(filename);
+		File tmpfile = new File(tmpname);
 
 		try {
 			GZIPOutputStream os = new GZIPOutputStream(new FileOutputStream(tmpname));
 			os.write(content);
 			os.flush();
 			os.close();
-		} catch (FileNotFoundException e) {
-			return false;
 		} catch (IOException e) {
-			System.err.println("IOException for file: "+tmpname);
-			return false;
+			tmpfile.delete();
+			throw e;
 		}
 
-		if (new File(tmpname).renameTo(new File(filename))) {
-			return true;
-		} else {
-			System.err.println("FilesystemBlockStore: failed to rename: "+tmpname+" => "+filename);
-			return false;
-		}
+		if (!tmpfile.renameTo(new File(filename)))
+			throw new IOException("FilesystemBlockStore: failed to rename: "+tmpname+" => "+filename);
+
+		return score;
 	}
 
 	/* store a block with associated data - no key generation/checking */
-	public boolean storeBlock_raw(Score score, byte[] content) {
+	private Score put_raw(byte[] content) throws IOException {
+		Score score = Score.compute(content);
 		String filename = getBlockPathname(score);
 		FileIO.createFilePath(filename);
 		String tmpname = filename+".tmp";
@@ -130,32 +104,26 @@ public class FilesystemBlockStore implements IBasicBlockStore {
 			RandomAccessFile f = new RandomAccessFile(tmpname, "rw");
 			f.write(content);
 			f.close();
-		} catch (FileNotFoundException e) {
-			System.err.println("FilesystemBlockStore: cannot open file: "+score);
-			return false;
 		} catch (IOException e) {
-			System.err.println("FilesystemBlockStore: error writing to file: "+score+" => "+e);
 			tmpfile.delete();
-			return false;
+			throw e;
 		}
 
-		if (tmpfile.renameTo(new File(filename))) {
-			return true;
-		} else {
-			System.err.println("FilesystemBlockStore: failed to rename: "+tmpfile+" => "+filename);
-			return false;
-		}
+		if (!tmpfile.renameTo(new File(filename)))
+			throw new IOException("FilesystemBlockStore: failed to rename: "+tmpfile+" => "+filename);
+
+		return score;
 	}
 
-	public boolean storeBlock(Score score, byte[] content) {
-		if (compress)
-			return storeBlock_gzip(score, content);
-		else
-			return storeBlock_raw(score, content);
+	public Score put(byte[] data) throws IOException {
+		return (compress ? put_gzip(data) : put_raw(data));
 	}
 
 	/* delete a block */
-	public boolean deleteBlock(Score k) {
-		return false;
+	public boolean delete(Score score) throws IOException {
+		/** trick to defeat shortcut evaluation */
+		boolean raw = new File(getBlockPathname(score)).delete();
+		boolean gz = new File(getBlockPathname(score)).delete();
+		return (raw || gz);
 	}
 }

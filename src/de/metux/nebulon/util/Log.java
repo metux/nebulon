@@ -1,6 +1,7 @@
-package de.metux.nebulon.base;
+package de.metux.nebulon.util;
 
 public class Log {
+
 	public static final void info(String text) {
 		System.err.println("[INFO] "+text);
 	}
