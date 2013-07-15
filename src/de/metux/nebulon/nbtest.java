@@ -16,19 +16,12 @@ public class nbtest {
 
 	public static final String filename = "Makefile";
 
-	private static IBlockStore _bs = null;
-	private static ICryptBlockStore _cbs = null;
+	private static IBlockStore blockstore = null;
+	private static ICryptBlockStore cryptblockstore = null;
 
-	public static IBlockStore getBS() {
-		if (_bs == null)
-			_bs = new FilesystemBlockStore("./data", true);
-		return _bs;
-	}
-
-	public static ICryptBlockStore getCBS() {
-		if (_cbs == null)
-			_cbs = new CryptBlockStore(getBS());
-		return _cbs;
+	static {
+		blockstore = new FilesystemBlockStore("./data", true);
+		cryptblockstore = new CryptBlockStore(blockstore);
 	}
 
 	public static final void dump(String score, byte[] data) throws IOException {
@@ -41,17 +34,14 @@ public class nbtest {
 	}
 
 	public static void testraw() throws IOException {
-		IBlockStore bs = getBS();
-		Score score = bs.put(FileIO.loadBinaryFile(filename));
-		dump(score.toString(), bs.get(score));
+		Score score = blockstore.put(FileIO.loadBinaryFile(filename));
+		dump(score.toString(), blockstore.get(score));
 	}
 
 	public static void test_crypt_file() throws IOException, GeneralSecurityException {
 		final int bufsize = 4096;
 
-		IBlockStore bs = getBS();
-		ICryptBlockStore cbs = getCBS();
-		CryptFileWriter cfw = new CryptFileWriter(bs, cbs);
+		CryptFileWriter cfw = new CryptFileWriter(blockstore, cryptblockstore);
 		FileInputStream in = new FileInputStream("nbtest");
 		byte buffer[] = new byte[bufsize];
 		int sz;
@@ -64,6 +54,7 @@ public class nbtest {
 			} else {
 				cfw.write(buffer);
 			}
+			System.err.println("Write done");
 		}
 
 		CryptScore sc = cfw.finish();
@@ -71,9 +62,8 @@ public class nbtest {
 	}
 
 	public static void testcrypt() throws IOException, GeneralSecurityException {
-		ICryptBlockStore cbs = getCBS();
-		CryptScore score = cbs.put(FileIO.loadBinaryFile(filename));
-		dump(score.toString(), cbs.get(score));
+		CryptScore score = cryptblockstore.put(FileIO.loadBinaryFile(filename));
+		dump(score.toString(), cryptblockstore.get(score));
 	}
 
 	public static void main(String argv[]) throws IOException, GeneralSecurityException {
