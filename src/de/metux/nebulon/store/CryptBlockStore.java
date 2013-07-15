@@ -4,6 +4,7 @@ import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.ICryptBlockStore;
 import de.metux.nebulon.base.Score;
+import de.metux.nebulon.util.FileIO;
 import de.metux.nebulon.util.Log;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -31,6 +32,8 @@ public class CryptBlockStore implements ICryptBlockStore {
 	public CryptScore put(byte[] data, String ciphertype) throws IOException, GeneralSecurityException {
 
 		byte[] key = Score.computeKey(data);
+
+		Log.debug("CryptScore::put() innerkey="+FileIO.byteArray2Hex(key));
 
 		Cipher cipher = Cipher.getInstance(ciphertype);
 		cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, ciphertype));

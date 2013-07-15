@@ -16,11 +16,11 @@ public class BlockRef {
 		score = s;
 	}
 
-	public String toString() {
+	public final String toString() {
 		return type+":"+score.toString();
 	}
 
-	public static String toString(String t, Score s) {
+	public static final String toString(String t, Score s) {
 		return t+":"+s.toString();
 	}
 

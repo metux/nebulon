@@ -16,16 +16,16 @@ public class CryptKey {
 		key = FileIO.hexStringToByteArray(k);
 	}
 
-	public static CryptKey parse(String s) {
+	public static final CryptKey parse(String s) {
 		String s2[] = s.split(":");
 		return new CryptKey(s2[0], s2[1]);
 	}
 
-	public String toString() {
+	public final String toString() {
 		return cipher+":"+FileIO.byteArray2Hex(key);
 	}
 
-	public void print(StringBuilder sb) {
+	public final void print(StringBuilder sb) {
 		sb.append(cipher);
 		sb.append(":");
 		sb.append(FileIO.byteArray2Hex(key));

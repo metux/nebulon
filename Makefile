@@ -1,7 +1,7 @@
 
 EXECUTABLE=nbtest
 MAIN_CLASS=de.metux.nebulon.nbtest
-GCJ_ARGS=-rdynamic -fjni
+GCJ_ARGS=-rdynamic -fjni -O2
 
 PREFIX?=/usr
 SBINDIR?=$(PREFIX)/sbin
@@ -36,5 +36,11 @@ install:	$(EXECUTABLE)
 	@chmod u+x $(DESTDIR)/$(SBINDIR)/$(EXECUTABLE)
 
 test:	$(EXECUTABLE)
-	./$(EXECUTABLE)
-
+	./$(EXECUTABLE) 2> 1.out
+	./$(EXECUTABLE) 2> 2.out
+	./$(EXECUTABLE) 2> 3.out
+	./$(EXECUTABLE) 2> 4.out
+	./$(EXECUTABLE) 2> 5.out
+	./$(EXECUTABLE) 2> 6.out
+	./$(EXECUTABLE) 2> 7.out
+	./$(EXECUTABLE) 2> 8.out
