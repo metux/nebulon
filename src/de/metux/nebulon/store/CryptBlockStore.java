@@ -21,7 +21,7 @@ public class CryptBlockStore implements ICryptBlockStore {
 	}
 
 	public boolean delete(CryptScore score) throws IOException {
-		return blockstore.delete(score.score);
+		return blockstore.delete(score.getScore());
 	}
 
 	public CryptScore put(byte[] data) throws IOException, GeneralSecurityException {
@@ -39,14 +39,14 @@ public class CryptBlockStore implements ICryptBlockStore {
 	}
 
 	public byte[] get(CryptScore score) throws IOException, GeneralSecurityException {
-		byte[] crypted = blockstore.get(score.score);
+		byte[] crypted = blockstore.get(score.getScore());
 		if (crypted == null) {
-			Log.info("CryptBlockStore::get() crypted block not found: "+score.score);
+			Log.info("CryptBlockStore::get() crypted block not found: "+score.getScore());
 			return null;
 		}
 
-		Cipher cipher = Cipher.getInstance(score.cipher);
-		cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(score.key, score.cipher));
+		Cipher cipher = Cipher.getInstance(score.getKey().cipher);
+		cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(score.getKey().key, score.getKey().cipher));
 		return cipher.doFinal(crypted);
 	}
 }

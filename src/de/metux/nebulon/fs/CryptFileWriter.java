@@ -17,7 +17,7 @@ public class CryptFileWriter {
 	ICryptBlockStore cryptblockstore;
 	IBlockStore blockstore;
 	BlockRefWriter brw;
-	ArrayList<CryptScore> keylist = new ArrayList<CryptScore>();
+	ArrayList<CryptKey> keylist = new ArrayList<CryptKey>();
 
 	public CryptFileWriter(IBlockStore bs, ICryptBlockStore cbs) {
 		cryptblockstore = cbs;
@@ -27,10 +27,8 @@ public class CryptFileWriter {
 
 	private byte[] serializeKeyList() {
 		StringBuffer sb = new StringBuffer();
-		for (CryptScore cs : keylist) {
-			sb.append(cs.cipher);
-			sb.append(":");
-			sb.append(FileIO.byteArray2Hex(cs.key));
+		for (CryptKey cs : keylist) {
+			cs.print(sb);
 			sb.append("\n");
 		}
 		return sb.toString().getBytes();
@@ -43,19 +41,20 @@ public class CryptFileWriter {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Class: cryptfile/1\n");
 		sb.append("BlockRefList: ");
-		sb.append(blockrefs.toString());
+		blockrefs.print(sb);
 		sb.append("\nKeyList: ");
-		sb.append(cryptscore.score.toString());
+		cryptscore.getScore().print(sb);
 		sb.append("\n");
 		System.err.println(sb.toString());
-		Score header_score = blockstore.put(sb.toString().getBytes());
-		CryptKey keylist_key = cryptscore.getKey();
-		return new CryptScore(header_score, keylist_key);
+		return new CryptScore(
+			blockstore.put(sb.toString().getBytes()),
+			cryptscore.getKey()
+		);
 	}
 
 	public void write(byte[] b) throws IOException, GeneralSecurityException {
 		CryptScore score = cryptblockstore.put(b);
-		brw.add(score.score);
-		keylist.add(score);
+		brw.add(score.getScore());
+		keylist.add(score.getKey());
 	}
 }

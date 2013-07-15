@@ -63,4 +63,10 @@ public class Score {
 		Log.err("Score::parse() failed to parse score: \""+s+"\"");
 		return null;
 	}
+
+	public void print(StringBuffer sb) {
+		sb.append(keytype);
+		sb.append(":");
+		sb.append(FileIO.byteArray2Hex(key));
+	}
 }

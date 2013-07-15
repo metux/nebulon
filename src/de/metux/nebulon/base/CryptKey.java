@@ -11,8 +11,23 @@ public class CryptKey {
 		key = k;
 	}
 
+	public CryptKey(String c, String k) {
+		cipher = c;
+		key = FileIO.hexStringToByteArray(k);
+	}
+
 	public static CryptKey parse(String s) {
 		String s2[] = s.split(":");
-		return new CryptKey(s2[0], FileIO.hexStringToByteArray(s2[1]));
+		return new CryptKey(s2[0], s2[1]);
+	}
+
+	public String toString() {
+		return cipher+":"+FileIO.byteArray2Hex(key);
+	}
+
+	public void print(StringBuffer sb) {
+		sb.append(cipher);
+		sb.append(":");
+		sb.append(FileIO.byteArray2Hex(key));
 	}
 }
