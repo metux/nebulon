@@ -8,7 +8,9 @@ import de.metux.nebulon.store.CryptBlockStore;
 import de.metux.nebulon.store.FilesystemBlockStore;
 import de.metux.nebulon.util.FileIO;
 import de.metux.nebulon.fs.CryptFileWriter;
+import de.metux.nebulon.fs.CryptFileReader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -59,6 +61,16 @@ public class nbtest {
 
 		CryptScore sc = cfw.finish();
 		System.err.println("Cryptfile: "+sc.toString());
+
+		/** now try to load the crypt file **/
+		CryptFileReader cfr = new CryptFileReader(blockstore, cryptblockstore, sc);
+		FileOutputStream out = new FileOutputStream("TEST.OUT");
+		byte[] buf;
+		while ((buf=cfr.read())!=null) {
+			out.write(buf);
+		}
+		out.flush();
+		out.close();
 	}
 
 	public static void testcrypt() throws IOException, GeneralSecurityException {

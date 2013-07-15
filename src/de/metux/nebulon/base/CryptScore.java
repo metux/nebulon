@@ -51,4 +51,8 @@ public class CryptScore {
 	public CryptKey getKey() {
 		return new CryptKey(cipher, key);
 	}
+
+	public Score getScore() {
+		return score;
+	}
 }

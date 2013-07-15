@@ -35,6 +35,10 @@ public class BlockRefWriter {
 
 	private Score flushBuffer() throws IOException {
 		Score s = blockstore.put(buffer.toString().getBytes());
+		System.err.println("==> BLOCKREF BLOCK");
+		System.err.println(buffer.toString());
+		System.err.println("<== BLOCKREF BLOCK");
+		System.err.println(" -> "+s.toString());
 		size = 0;
 		buffer = new StringBuffer(1024);
 		return s;

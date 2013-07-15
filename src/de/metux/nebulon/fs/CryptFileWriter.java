@@ -22,7 +22,7 @@ public class CryptFileWriter {
 	public CryptFileWriter(IBlockStore bs, ICryptBlockStore cbs) {
 		cryptblockstore = cbs;
 		blockstore = bs;
-		brw = new BlockRefWriter(bs, BlockRef.type_blocklist);
+		brw = new BlockRefWriter(bs, BlockRef.type_crypted_data);
 	}
 
 	private byte[] serializeKeyList() {
@@ -41,7 +41,7 @@ public class CryptFileWriter {
 		CryptScore cryptscore = cryptblockstore.put(serializeKeyList());
 		Score blockrefs = brw.finish();
 		StringBuffer sb = new StringBuffer();
-		sb.append("Content-Type: nebulon/cryptfile-1\n");
+		sb.append("Class: cryptfile/1\n");
 		sb.append("BlockRefList: ");
 		sb.append(blockrefs.toString());
 		sb.append("\nKeyList: ");
