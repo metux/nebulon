@@ -29,15 +29,13 @@ public class CryptBlockStore implements ICryptBlockStore {
 	}
 
 	public CryptScore put(byte[] data, String ciphertype) throws IOException, GeneralSecurityException {
-		CryptScore cs = new CryptScore();
-		cs.cipher = ciphertype;
-		cs.key = Score.compute(data).key; // the inner score is our cipher key
 
-		SecretKeySpec ks = new SecretKeySpec(cs.key, ciphertype);
+		byte[] key = Score.computeKey(data);
+
 		Cipher cipher = Cipher.getInstance(ciphertype);
-		cipher.init(Cipher.ENCRYPT_MODE, ks);
-		cs.score = blockstore.put(cipher.doFinal(data));
-		return cs;
+		cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, ciphertype));
+
+		return new CryptScore(blockstore.put(cipher.doFinal(data)), ciphertype, key);
 	}
 
 	public byte[] get(CryptScore score) throws IOException, GeneralSecurityException {
@@ -47,9 +45,8 @@ public class CryptBlockStore implements ICryptBlockStore {
 			return null;
 		}
 
-		SecretKeySpec ks = new SecretKeySpec(score.key, score.cipher);
 		Cipher cipher = Cipher.getInstance(score.cipher);
-		cipher.init(Cipher.DECRYPT_MODE, ks);
+		cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(score.key, score.cipher));
 		return cipher.doFinal(crypted);
 	}
 }

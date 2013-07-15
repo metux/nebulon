@@ -17,8 +17,26 @@ public class Score {
 		key = k;
 	}
 
+	public Score(String kt, String k) {
+		keytype = kt;
+		key = FileIO.hexStringToByteArray(k);
+	}
+
 	public String toString() {
 		return ((keytype==null)?"":keytype)+":"+((key==null)?"":FileIO.byteArray2Hex(key));
+	}
+
+	public static final byte[] computeKey(byte[] data) {
+		return computeKey(default_keytype, data);
+	}
+
+	public static byte[] computeKey(String keytype, byte[] data) {
+		try {
+			return MessageDigest.getInstance(keytype).digest(data);
+		} catch (NoSuchAlgorithmException e) {
+			Log.err("Score::computeKey() No such algorithm: "+keytype, e);
+			return null;
+		}
 	}
 
 	public static Score compute(String keytype, byte[] data) {
@@ -32,5 +50,17 @@ public class Score {
 
 	public static Score compute(byte[] data) {
 		return compute(default_keytype, data);
+	}
+
+	public static final Score parse(String s) {
+		if (s == null)
+			s = "";
+
+		String[] s2 = s.split(":");
+		if (s2.length == 2)
+			return new Score(s2[0], s2[1]);
+
+		Log.err("Score::parse() failed to parse score: \""+s+"\"");
+		return null;
 	}
 }
