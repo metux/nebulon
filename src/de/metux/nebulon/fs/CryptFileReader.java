@@ -6,12 +6,10 @@ import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.CryptKey;
 import de.metux.nebulon.base.BlockRef;
-import de.metux.nebulon.util.FileIO;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.lang.StringBuffer;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 
@@ -46,7 +44,6 @@ public class CryptFileReader {
 	}
 
 	void load_key_list(Score score) throws IOException, GeneralSecurityException {
-		System.err.println("keylist ref: "+score.toString());
 		byte[] data = cryptblockstore.get(new CryptScore(score,rootkey));
 		if (data == null)
 			throw new IOException("cannot read keylist: "+score.toString());

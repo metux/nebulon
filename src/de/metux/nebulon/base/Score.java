@@ -64,7 +64,7 @@ public class Score {
 		return null;
 	}
 
-	public void print(StringBuffer sb) {
+	public void print(StringBuilder sb) {
 		sb.append(keytype);
 		sb.append(":");
 		sb.append(FileIO.byteArray2Hex(key));

@@ -1,6 +1,5 @@
 package de.metux.nebulon.base;
 
-import de.metux.nebulon.util.FileIO;
 import de.metux.nebulon.util.Log;
 
 /**

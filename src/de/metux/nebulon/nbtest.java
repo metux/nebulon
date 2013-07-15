@@ -48,7 +48,7 @@ public class nbtest {
 		byte buffer[] = new byte[bufsize];
 		int sz;
 		while ((sz = in.read(buffer))!=-1) {
-			System.err.println("Got "+sz+" bytes ... writing to cbs");
+//			System.err.println("Got "+sz+" bytes ... writing to cbs");
 			if (sz != bufsize) {
 				byte[] newbuf = new byte[sz];
 				System.arraycopy(buffer, 0, newbuf, 0, sz);
@@ -56,7 +56,7 @@ public class nbtest {
 			} else {
 				cfw.write(buffer);
 			}
-			System.err.println("Write done");
+//			System.err.println("Write done");
 		}
 
 		CryptScore sc = cfw.finish();
@@ -80,7 +80,7 @@ public class nbtest {
 
 	public static void main(String argv[]) throws IOException, GeneralSecurityException {
 //		testraw();
-		testcrypt();
+//		testcrypt();
 		test_crypt_file();
 	}
 }

@@ -25,7 +25,7 @@ public class CryptKey {
 		return cipher+":"+FileIO.byteArray2Hex(key);
 	}
 
-	public void print(StringBuffer sb) {
+	public void print(StringBuilder sb) {
 		sb.append(cipher);
 		sb.append(":");
 		sb.append(FileIO.byteArray2Hex(key));

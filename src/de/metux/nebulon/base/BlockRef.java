@@ -1,7 +1,7 @@
 package de.metux.nebulon.base;
 
 import de.metux.nebulon.util.Log;
-import java.lang.StringBuffer;
+import java.lang.StringBuilder;
 
 public class BlockRef {
 
@@ -37,7 +37,7 @@ public class BlockRef {
 	}
 
 	public static final byte[] serializeScoreList(Score[] scores, int max, String type) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int x=0; x<max; x++) {
 			sb.append(type);
 			sb.append(":");

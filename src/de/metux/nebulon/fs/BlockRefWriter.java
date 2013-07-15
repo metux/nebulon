@@ -3,7 +3,8 @@ package de.metux.nebulon.fs;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.BlockRef;
-import java.lang.StringBuffer;
+import de.metux.nebulon.util.Log;
+import java.lang.StringBuilder;
 import java.io.IOException;
 
 /**
@@ -19,7 +20,7 @@ public class BlockRefWriter {
 	/* maximum number of blockrefs per tree */
 	public static final int max_refs = 128;
 
-	StringBuffer buffer = new StringBuffer(1024);
+	StringBuilder buffer = new StringBuilder(1024);
 	public int size = 0;
 
 	public BlockRefWriter(IBlockStore bs, String rt) {
@@ -35,16 +36,14 @@ public class BlockRefWriter {
 
 	private Score flushBuffer() throws IOException {
 		Score s = blockstore.put(buffer.toString().getBytes());
-		System.err.println("==> BLOCKREF BLOCK");
-		System.err.println(buffer.toString());
-		System.err.println("<== BLOCKREF BLOCK");
-		System.err.println(" -> "+s.toString());
 		size = 0;
-		buffer = new StringBuffer(1024);
+		buffer = new StringBuilder(1024);
 		return s;
 	}
 
 	public void add(Score s) throws IOException {
+		Log.debug("BlockRefWriter::add() score="+s.toString());
+
 		/** our list is full - write out and push to the next hierachy level */
 		if (size == max_refs-1) {
 			addParent(flushBuffer());
@@ -53,7 +52,7 @@ public class BlockRefWriter {
 
 		buffer.append(reftype);
 		buffer.append(":");
-		buffer.append(s.toString());
+		s.print(buffer);
 		buffer.append("\n");
 		size++;
 	}
