@@ -6,7 +6,6 @@ import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.CryptKey;
 import de.metux.nebulon.base.BlockRef;
-import de.metux.nebulon.util.Encoder;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -49,7 +48,6 @@ public class CryptFileReader {
 		if (data == null)
 			throw new IOException("cannot read keylist: "+score.toString());
 
-		data = Encoder.decode_gzip(data);
 		BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(data)));
 		String line;
 		while ((line = r.readLine())!=null)

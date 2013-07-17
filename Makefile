@@ -1,10 +1,12 @@
 
 EXECUTABLE=nbtest
 MAIN_CLASS=de.metux.nebulon.nbtest
-GCJ_ARGS=-rdynamic -fjni -O2
+GCJ_ARGS=-rdynamic -fjni -O2 -findirect-dispatch
 
 PREFIX?=/usr
 SBINDIR?=$(PREFIX)/sbin
+
+BCPROV_JAR=$(SYSROOT)/usr/share/java/bcprov.jar
 
 compile:	$(EXECUTABLE)
 
@@ -12,8 +14,8 @@ $(EXECUTABLE):
 	@echo "Building $@"
 	@rm -Rf classes
 	@mkdir -p classes
-	@javac -d classes `find src -name "*.java"`
-	@gcj $(GCJ_ARGS) -rdynamic -fjni `find src -name "*.java"` -o $(EXECUTABLE) --main=$(MAIN_CLASS)
+#	@javac -d classes `find src -name "*.java"` -cp $(BCPROV_JAR)
+	@gcj $(GCJ_ARGS) -rdynamic -fjni `find src -name "*.java"` --classpath $(BCPROV_JAR) -o $(EXECUTABLE) --main=$(MAIN_CLASS)
 
 clean:
 	@rm -Rf tmp classes $(EXECUTABLE)

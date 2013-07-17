@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+
 public class nbtest {
 
 	public static final String filename = "Makefile";
@@ -22,7 +23,7 @@ public class nbtest {
 	private static ICryptBlockStore cryptblockstore = null;
 
 	static {
-		blockstore = new FilesystemBlockStore("./data", true);
+		blockstore = new FilesystemBlockStore("./data", false);
 		cryptblockstore = new CryptBlockStore(blockstore);
 	}
 

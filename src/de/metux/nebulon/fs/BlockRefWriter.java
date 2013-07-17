@@ -42,7 +42,7 @@ public class BlockRefWriter {
 	}
 
 	public void add(Score s) throws IOException {
-		Log.debug("BlockRefWriter::add() score="+s.toString());
+//		Log.debug("BlockRefWriter::add() score="+s.toString());
 
 		/** our list is full - write out and push to the next hierachy level */
 		if (size == max_refs-1) {

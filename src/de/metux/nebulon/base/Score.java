@@ -32,7 +32,11 @@ public class Score {
 
 	public static byte[] computeKey(String keytype, byte[] data) {
 		try {
-			return MessageDigest.getInstance(keytype).digest(data);
+			long start = System.nanoTime();
+			byte[] key = MessageDigest.getInstance(keytype).digest(data);
+			long end = System.nanoTime();
+			Log.debug("Score::computeKey() took "+(end-start)+" ns");
+			return key;
 		} catch (NoSuchAlgorithmException e) {
 			Log.err("Score::computeKey() No such algorithm: "+keytype, e);
 			return null;

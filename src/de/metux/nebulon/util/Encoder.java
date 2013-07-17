@@ -19,4 +19,13 @@ public class Encoder {
 	public static final byte[] decode_gzip(byte[] data) throws IOException {
 		return FileIO.readBytes(new GZIPInputStream(new ByteArrayInputStream(data)));
 	}
+
+	public final String encryptions_ciphers[] = {
+		"Blowfish/ECB/PKCS5Padding",
+		"Blowfish/ECB/PKCS5Padding",
+		"AES/ECB/PKCS5Padding",
+		"AES/ECB/PKCS5Padding"
+	};
+
+	public final boolean encryption_gzip[] = { false, true, false, true };
 }
