@@ -9,6 +9,7 @@ import de.metux.nebulon.store.FilesystemBlockStore;
 import de.metux.nebulon.util.FileIO;
 import de.metux.nebulon.fs.CryptFileWriter;
 import de.metux.nebulon.fs.CryptFileReader;
+//import de.metux.nebulon.crypt.Crypt;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -79,9 +80,27 @@ public class nbtest {
 		dump(score.toString(), cryptblockstore.get(score));
 	}
 
+/*
+	public static void testcni() {
+//		byte[] input = new String("Hello world foo blah").getBytes();
+		byte[] input = new byte[16];
+		input[0] = 1;
+		input[1] = 2;
+		input[2] = 3;
+		input[3] = 4;
+		byte[] result = OpenSSL.AES_encrypt(input);
+		if (result == null)
+			System.err.println("testcni: result array is null");
+//		else
+//			System.err.println("testcni: got non-null");
+//			System.err.println("testcni: result array size: "+result.length);
+	}
+*/
+
 	public static void main(String argv[]) throws IOException, GeneralSecurityException {
 //		testraw();
 //		testcrypt();
 		test_crypt_file();
+//		testcni();
 	}
 }

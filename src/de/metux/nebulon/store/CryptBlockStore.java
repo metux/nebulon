@@ -4,26 +4,19 @@ import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.ICryptBlockStore;
 import de.metux.nebulon.base.Score;
+import de.metux.nebulon.crypt.Crypt;
 import de.metux.nebulon.util.Encoder;
 import de.metux.nebulon.util.FileIO;
 import de.metux.nebulon.util.Log;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.Security;
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CryptBlockStore implements ICryptBlockStore {
-
-	static {
-		Security.addProvider(new BouncyCastleProvider());
-	}
 
 	private static final String default_ciphertype = "Blowfish/ECB/PKCS5Padding";
 
 	private IBlockStore blockstore;
-	private boolean gzip = true;
+	private boolean gzip = false;
 
 	public CryptBlockStore(IBlockStore bs) {
 		blockstore = bs;
@@ -39,14 +32,15 @@ public class CryptBlockStore implements ICryptBlockStore {
 
 	public CryptScore put(byte[] data, String ciphertype) throws IOException, GeneralSecurityException {
 
+		if (gzip)
+			data = Encoder.encode_gzip(data);
+
 		byte[] key = Score.computeKey(data);
 
 		Log.debug("CryptScore::put() innerkey="+FileIO.byteArray2Hex(key));
 
 		long start = System.nanoTime();
-		Cipher cipher = Cipher.getInstance(ciphertype);
-		cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, ciphertype));
-		byte[] crypted = cipher.doFinal(gzip ? Encoder.encode_gzip(data) : data);
+		byte[] crypted = Crypt.encrypt(ciphertype, key, data);
 		long end = System.nanoTime();
 
 		Log.debug("CryptScore::put() encryption time: "+(end-start));
@@ -67,13 +61,14 @@ public class CryptBlockStore implements ICryptBlockStore {
 
 		String ct = score.getKey().cipher;
 		if (ct.endsWith("/GZip")) {
-			Cipher cipher = Cipher.getInstance(ct.substring(0, ct.length()-5));
-			cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(score.getKey().key, score.getKey().cipher));
-			return Encoder.decode_gzip(cipher.doFinal(crypted));
+			return Encoder.decode_gzip(
+				Crypt.decrypt(
+					ct.substring(0, ct.length()-5),
+					score.getKey().key,
+					crypted
+			));
 		} else {
-			Cipher cipher = Cipher.getInstance(score.getKey().cipher);
-			cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(score.getKey().key, score.getKey().cipher));
-			return cipher.doFinal(crypted);
+			return Crypt.decrypt(ct, score.getKey().key, crypted);
 		}
 	}
 }

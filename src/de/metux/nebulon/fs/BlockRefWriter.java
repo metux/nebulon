@@ -3,7 +3,7 @@ package de.metux.nebulon.fs;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.BlockRef;
-import de.metux.nebulon.util.Log;
+//import de.metux.nebulon.util.Log;
 import java.lang.StringBuilder;
 import java.io.IOException;
 

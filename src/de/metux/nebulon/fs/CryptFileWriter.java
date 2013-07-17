@@ -6,7 +6,6 @@ import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.CryptKey;
 import de.metux.nebulon.base.BlockRef;
-import de.metux.nebulon.util.Log;
 import java.io.IOException;
 import java.lang.StringBuilder;
 import java.security.GeneralSecurityException;
@@ -52,7 +51,6 @@ public class CryptFileWriter {
 
 	public void write(byte[] b) throws IOException, GeneralSecurityException {
 		CryptScore score = cryptblockstore.put(b);
-//		Log.debug("CryptFileWriter::write() score="+score.getScore().toString());
 		brw.add(score.getScore());
 		keylist.add(score.getKey());
 	}

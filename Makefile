@@ -1,7 +1,7 @@
 
 EXECUTABLE=nbtest
 MAIN_CLASS=de.metux.nebulon.nbtest
-GCJ_ARGS=-rdynamic -fjni -O2 -findirect-dispatch
+GCJ_ARGS=-rdynamic -O2
 
 PREFIX?=/usr
 SBINDIR?=$(PREFIX)/sbin
@@ -10,15 +10,22 @@ BCPROV_JAR=$(SYSROOT)/usr/share/java/bcprov.jar
 
 compile:	$(EXECUTABLE)
 
-$(EXECUTABLE):
+OPENSSL_CNI_JAVA=src/de/metux/nebulon/crypt/OpenSSL.java
+OPENSSL_CNI_OBJECT=OpenSSL.o
+
+cni:
+	gcj -C $(OPENSSL_CNI_JAVA) -d tmp/cni
+	gcjh -classpath tmp/cni de.metux.nebulon.crypt.OpenSSL -o tmp/cni/de_metux_nebulon_crypt_OpenSSL.h
+	g++ -c src/OpenSSL.cpp -Itmp/cni -o $(OPENSSL_CNI_OBJECT)
+
+$(EXECUTABLE): cni
 	@echo "Building $@"
 	@rm -Rf classes
 	@mkdir -p classes
-#	@javac -d classes `find src -name "*.java"` -cp $(BCPROV_JAR)
-	@gcj $(GCJ_ARGS) -rdynamic -fjni `find src -name "*.java"` --classpath $(BCPROV_JAR) -o $(EXECUTABLE) --main=$(MAIN_CLASS)
+	gcj $(GCJ_ARGS) -rdynamic `find src -name "*.java"` $(OPENSSL_CNI_OBJECT) --classpath $(BCPROV_JAR) -o $(EXECUTABLE) --main=$(MAIN_CLASS)
 
 clean:
-	@rm -Rf tmp classes $(EXECUTABLE)
+	@rm -Rf tmp classes $(EXECUTABLE) $(OPENSSL_CNI_OBJECT)
 
 run:	compile
 	./$(EXECUTABLE)
