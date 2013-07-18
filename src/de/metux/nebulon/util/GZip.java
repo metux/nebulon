@@ -1,5 +1,7 @@
 package de.metux.nebulon.util;
 
+import de.metux.nebulon.base.Score;
+import de.metux.nebulon.util.FileIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,7 +15,11 @@ public class GZip {
 		GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
 		gzipOutputStream.write(data);
 		gzipOutputStream.close();
-		return byteArrayOutputStream.toByteArray();
+		byte[] compressed = byteArrayOutputStream.toByteArray();
+
+		System.err.println("Compress "+FileIO.byteArray2Hex(Score.computeKey(data))+" => "+FileIO.byteArray2Hex(Score.computeKey(compressed)));
+
+		return compressed;
 	}
 
 	public static final byte[] uncompress(byte[] data) throws IOException {
