@@ -1,20 +1,21 @@
 package de.metux.nebulon.store;
 
+import de.metux.nebulon.base.CryptIntegrityException;
 import de.metux.nebulon.base.CryptScore;
+import de.metux.nebulon.base.CryptKey;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.ICryptBlockStore;
 import de.metux.nebulon.base.Score;
 import de.metux.nebulon.crypt.Crypt;
-import de.metux.nebulon.util.Encoder;
 import de.metux.nebulon.util.FileIO;
 import de.metux.nebulon.util.Log;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 public class CryptBlockStore implements ICryptBlockStore {
 
 	private IBlockStore blockstore;
-	private boolean gzip = false;
 
 	public CryptBlockStore(IBlockStore bs) {
 		blockstore = bs;
@@ -30,9 +31,6 @@ public class CryptBlockStore implements ICryptBlockStore {
 
 	public CryptScore put(byte[] data, String ciphertype) throws IOException, GeneralSecurityException {
 
-		if (gzip)
-			data = Encoder.encode_gzip(data);
-
 		byte[] key = Score.computeKey(data);
 
 		Log.debug("CryptScore::put() innerkey="+FileIO.byteArray2Hex(key));
@@ -43,11 +41,7 @@ public class CryptBlockStore implements ICryptBlockStore {
 
 		Log.debug("CryptScore::put() encryption time: "+(end-start));
 
-		return new CryptScore(
-			blockstore.put(crypted),
-			(gzip ? ciphertype+"@GZ" : ciphertype),
-			key
-		);
+		return new CryptScore(blockstore.put(crypted),ciphertype,key);
 	}
 
 	public byte[] get(CryptScore score) throws IOException, GeneralSecurityException {
@@ -57,16 +51,14 @@ public class CryptBlockStore implements ICryptBlockStore {
 			return null;
 		}
 
-		String ct = score.getKey().cipher;
-		if (ct.endsWith("@GZ")) {
-			return Encoder.decode_gzip(
-				Crypt.decrypt(
-					ct.substring(0, ct.length()-5),
-					score.getKey().key,
-					crypted
-			));
-		} else {
-			return Crypt.decrypt(ct, score.getKey().key, crypted);
-		}
+		CryptKey k = score.getKey();
+		byte[] cleartext = Crypt.decrypt(k.cipher, k.key, crypted);
+
+		/* integrity check */
+		byte[] confirm_key = Score.computeKey(cleartext);
+		if (!Arrays.equals(k.key,confirm_key))
+			throw new CryptIntegrityException(confirm_key, k.key);
+
+		return cleartext;
 	}
 }

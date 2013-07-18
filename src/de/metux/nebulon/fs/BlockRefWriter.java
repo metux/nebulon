@@ -3,7 +3,6 @@ package de.metux.nebulon.fs;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.Score;
 import de.metux.nebulon.base.BlockRef;
-//import de.metux.nebulon.util.Log;
 import java.lang.StringBuilder;
 import java.io.IOException;
 
@@ -42,7 +41,6 @@ public class BlockRefWriter {
 	}
 
 	public void add(Score s) throws IOException {
-//		Log.debug("BlockRefWriter::add() score="+s.toString());
 
 		/** our list is full - write out and push to the next hierachy level */
 		if (size == max_refs-1) {
