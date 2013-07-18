@@ -7,10 +7,17 @@
 #include <stdio.h>
 #include <java/lang/System.h>
 #include <java/io/PrintStream.h>
+//#include <openssl/aes.h>
 #include <malloc.h>
 using java::lang::System;
 using java::lang::Class;
 #include "de_metux_nebulon_crypt_OpenSSL.h"
+
+extern "C" {
+
+#include <openssl/aes.h>
+
+};
 
 void de::metux::nebulon::crypt::OpenSSL::dummy(::java::lang::String * str) {
 	printf("FOO BAR\n");
@@ -20,20 +27,30 @@ void de::metux::nebulon::crypt::OpenSSL::dummy(::java::lang::String * str) {
 
 JArray< jbyte > * de::metux::nebulon::crypt::OpenSSL::AES_encrypt(JArray< jbyte > * key, JArray< jbyte > * content) {
 	if (content == NULL) {
-		printf("content is NULL\n");
-	} else {
-		printf("X content is not null:\n", content);
-//		content= JvNewByteArray(5);
-		printf("size=%d\n", content->length);
-		jbyte *intp = elements(content);
-//		char* buffer = (char*)malloc(content->length);
-//		memcpy(buffer, content->elements, content->length);
-//		jbyte b = intp[0];
-//		printf("%c%c%c%c\n", intp[0], intp[1], intp[2], intp[3]);
-		System::out->println(content->length);
-		printf("FOO\n");
+		printf("AES: content is null\n");
+		return NULL;
 	}
-	return content;
+
+	if (key == NULL) {
+		printf("AES: key is null\n");
+		return NULL;
+	}
+
+	printf("content size=%d\n", content->length);
+	printf("key size=%d\n", key->length);
+	jbyte *intp = elements(key);
+
+//	for (int x=0; x<(key->length); x++) {
+//		printf("%02X ", (intp[x] & 0xFF));
+//	}
+//	printf("\n");
+
+	AES_KEY enc_key;
+	AES_set_encrypt_key((const unsigned char*)intp, (key->length)*8, &enc_key);
+
+	JArray< jbyte >* result = JvNewByteArray(content->length);
+
+	return result;
 }
 
 JArray< jbyte > * de::metux::nebulon::crypt::OpenSSL::AES_decrypt(JArray< jbyte > * key, JArray< jbyte > * crypttext) {

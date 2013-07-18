@@ -56,6 +56,15 @@ public class FileIO {
 		return new String(hexChars);
 	}
 
+	public static final String toHex(byte b) {
+		char[] hexChars = new char[2];
+		int v;
+		v = b & 0xFF;
+		hexChars[0] = hexArray[v >>> 4];
+		hexChars[1] = hexArray[v & 0x0F];
+		return new String(hexChars);
+	}
+
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
 		byte[] data = new byte[len / 2];
