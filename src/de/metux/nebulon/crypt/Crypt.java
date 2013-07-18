@@ -8,11 +8,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Crypt {
 
-//	public static final String default_ciphertype = "@AES256";
-	public static final String default_ciphertype = "@NULL";
-//	public static final String default_ciphertype = "AES/ECB/PKCS5Padding";
-//	public static final String default_ciphertype = "Blowfish/ECB/PKCS5Padding";
-
 	public static byte[] encrypt(String ciphertype, byte[] key, byte[] content) throws IOException, GeneralSecurityException {
 
 		if (key == null)
@@ -22,7 +17,7 @@ public class Crypt {
 
 		/** transparent content compression **/
 		if (ciphertype.endsWith("@GZ"))
-			return GZip.compress(encrypt(ciphertype.substring(0,ciphertype.length()-3),key,content));
+			return encrypt(ciphertype.substring(0,ciphertype.length()-3),key,GZip.compress(content));
 
 		/** OpenSSL-based AES-256 **/
 		if (ciphertype.equals("@AES256"))

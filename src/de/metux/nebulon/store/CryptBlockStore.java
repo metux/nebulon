@@ -3,6 +3,7 @@ package de.metux.nebulon.store;
 import de.metux.nebulon.base.CryptIntegrityException;
 import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.CryptKey;
+import de.metux.nebulon.base.Defaults;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.ICryptBlockStore;
 import de.metux.nebulon.base.Score;
@@ -26,20 +27,25 @@ public class CryptBlockStore implements ICryptBlockStore {
 	}
 
 	public CryptScore put(byte[] data) throws IOException, GeneralSecurityException {
-		return put(data, Crypt.default_ciphertype);
+		return put(data, Defaults.crypt_ciphertype);
 	}
 
 	public CryptScore put(byte[] data, String ciphertype) throws IOException, GeneralSecurityException {
 
 		byte[] key = Score.computeKey(data);
 
-		Log.debug("CryptScore::put() innerkey="+FileIO.byteArray2Hex(key));
+		if (Defaults.cryptstore_debug)
+			Log.debug("CryptScore::put() innerkey="+FileIO.byteArray2Hex(key));
 
-		long start = System.nanoTime();
+		long start = 0;
+
+		if (Defaults.cryptstore_timing)
+			start = System.nanoTime();
+
 		byte[] crypted = Crypt.encrypt(ciphertype, key, data);
-		long end = System.nanoTime();
 
-		Log.debug("CryptScore::put() encryption time: "+(end-start));
+		if (Defaults.cryptstore_timing)
+			Log.debug("CryptScore::put() encryption time: "+(System.nanoTime()-start));
 
 		return new CryptScore(blockstore.put(crypted),ciphertype,key);
 	}
@@ -52,7 +58,16 @@ public class CryptBlockStore implements ICryptBlockStore {
 		}
 
 		CryptKey k = score.getKey();
+
+		long start = 0;
+
+		if (Defaults.cryptstore_timing)
+			start = System.nanoTime();
+
 		byte[] cleartext = Crypt.decrypt(k.cipher, k.key, crypted);
+
+		if (Defaults.cryptstore_timing)
+			Log.debug("CryptScore::put() decryption time: "+(System.nanoTime()-start));
 
 		/* integrity check */
 		byte[] confirm_key = Score.computeKey(cleartext);
