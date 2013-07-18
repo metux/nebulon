@@ -3,5 +3,6 @@
 /javadoc
 /tmp
 /data
+/TEST.IN
 /TEST.OUT
 *.o

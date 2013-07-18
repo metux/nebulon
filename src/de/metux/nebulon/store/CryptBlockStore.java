@@ -13,8 +13,6 @@ import java.security.GeneralSecurityException;
 
 public class CryptBlockStore implements ICryptBlockStore {
 
-	private static final String default_ciphertype = "Blowfish/ECB/PKCS5Padding";
-
 	private IBlockStore blockstore;
 	private boolean gzip = false;
 
@@ -27,7 +25,7 @@ public class CryptBlockStore implements ICryptBlockStore {
 	}
 
 	public CryptScore put(byte[] data) throws IOException, GeneralSecurityException {
-		return put(data, default_ciphertype);
+		return put(data, Crypt.default_ciphertype);
 	}
 
 	public CryptScore put(byte[] data, String ciphertype) throws IOException, GeneralSecurityException {
@@ -47,7 +45,7 @@ public class CryptBlockStore implements ICryptBlockStore {
 
 		return new CryptScore(
 			blockstore.put(crypted),
-			(gzip ? ciphertype+"/GZip" : ciphertype),
+			(gzip ? ciphertype+"@GZ" : ciphertype),
 			key
 		);
 	}
@@ -60,7 +58,7 @@ public class CryptBlockStore implements ICryptBlockStore {
 		}
 
 		String ct = score.getKey().cipher;
-		if (ct.endsWith("/GZip")) {
+		if (ct.endsWith("@GZ")) {
 			return Encoder.decode_gzip(
 				Crypt.decrypt(
 					ct.substring(0, ct.length()-5),

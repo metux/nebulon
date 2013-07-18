@@ -40,7 +40,9 @@ clean:
 	@rm -Rf tmp classes $(EXECUTABLE) $(OPENSSL_CNI_OBJECT) $(MAIN_OBJECT)
 
 run:	compile
-	./$(EXECUTABLE)
+	@(find -name "*.java" -exec "cat" "{}" ";")>TEST.IN
+	@./$(EXECUTABLE)
+	@diff -ruN TEST.IN TEST.OUT
 
 policy:
 	@for i in `find -name "*.java"` ; do \
@@ -55,13 +57,3 @@ install:	$(EXECUTABLE)
 	@mkdir -p $(DESTDIR)/$(SBINDIR)
 	@cp $(EXECUTABLE) $(DESTDIR)/$(SBINDIR)
 	@chmod u+x $(DESTDIR)/$(SBINDIR)/$(EXECUTABLE)
-
-test:	$(EXECUTABLE)
-	./$(EXECUTABLE) 2> 1.out
-	./$(EXECUTABLE) 2> 2.out
-	./$(EXECUTABLE) 2> 3.out
-	./$(EXECUTABLE) 2> 4.out
-	./$(EXECUTABLE) 2> 5.out
-	./$(EXECUTABLE) 2> 6.out
-	./$(EXECUTABLE) 2> 7.out
-	./$(EXECUTABLE) 2> 8.out
