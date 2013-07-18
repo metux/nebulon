@@ -99,8 +99,8 @@ public class nbtest {
 
 	public static void main(String argv[]) throws IOException, GeneralSecurityException {
 //		testraw();
-//		testcrypt();
-		test_crypt_file();
+		testcrypt();
+//		test_crypt_file();
 //		testcni();
 	}
 }
