@@ -21,4 +21,7 @@ public class Defaults {
 	public static final boolean cryptstore_debug = false;
 
 	public static final boolean zip_debug = false;
+
+	// default compression level
+	public static final int zip_level = 9;
 }

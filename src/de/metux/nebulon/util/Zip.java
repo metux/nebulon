@@ -6,6 +6,7 @@ import de.metux.nebulon.util.FileIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -13,7 +14,7 @@ public class Zip {
 
 	public static final byte[] compress(byte[] data) throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
-		DeflaterOutputStream zip = new DeflaterOutputStream(byteout);
+		DeflaterOutputStream zip = new DeflaterOutputStream(byteout, new Deflater(Defaults.zip_level));
 		zip.write(data);
 		zip.close();
 		byte[] compressed = byteout.toByteArray();
