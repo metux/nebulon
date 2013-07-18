@@ -7,17 +7,11 @@
 #include <stdio.h>
 #include <java/lang/System.h>
 #include <java/io/PrintStream.h>
-//#include <openssl/aes.h>
+#include <openssl/aes.h>
 #include <malloc.h>
 using java::lang::System;
 using java::lang::Class;
 #include "de_metux_nebulon_crypt_OpenSSL.h"
-
-extern "C" {
-
-#include <openssl/aes.h>
-
-};
 
 void de::metux::nebulon::crypt::OpenSSL::dummy(::java::lang::String * str) {
 	printf("FOO BAR\n");
