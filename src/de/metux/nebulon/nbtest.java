@@ -1,5 +1,12 @@
 package de.metux.nebulon;
 
+import de.metux.nanoweb.mount.MountEntry;
+import de.metux.nanoweb.mount.MountingHandler;
+import de.metux.nanoweb.example.DummyHandler;
+import de.metux.nanoweb.daemon.MiniServer;
+import de.metux.nebulon.service.BlockStoreHandler;
+import de.metux.nebulon.service.CryptBlockStoreHandler;
+import de.metux.nebulon.service.CryptFileHandler;
 import de.metux.nebulon.base.CryptScore;
 import de.metux.nebulon.base.IBlockStore;
 import de.metux.nebulon.base.ICryptBlockStore;
@@ -17,6 +24,7 @@ import java.security.GeneralSecurityException;
 
 public class nbtest {
 
+	public static final int http_port = 8080;
 	public static final String filename = "Makefile";
 
 	private static IBlockStore blockstore = null;
@@ -77,9 +85,30 @@ public class nbtest {
 		dump(score.toString(), cryptblockstore.get(score));
 	}
 
+	public static void server() {
+		DummyHandler dh = new DummyHandler();
+		BlockStoreHandler bsh = new BlockStoreHandler(blockstore);
+		CryptBlockStoreHandler cbsh = new CryptBlockStoreHandler(cryptblockstore);
+		CryptFileHandler cfh = new CryptFileHandler(blockstore, cryptblockstore);
+
+		MiniServer srv = new MiniServer(
+			http_port,
+			new MountingHandler(
+				dh,
+				new MountEntry[] {
+					new MountEntry("getblock", bsh),
+					new MountEntry("getcryptblock", cbsh),
+					new MountEntry("getcryptfile", cfh)
+				}
+			)
+		);
+		srv.run();
+	}
+
 	public static void main(String argv[]) throws IOException, GeneralSecurityException {
 //		testraw();
 //		testcrypt();
 		test_crypt_file();
+		server();
 	}
 }

@@ -14,11 +14,11 @@ compile:	$(TEST_EXECUTABLE)
 
 $(TEST_MAIN_OBJECT):
 	@mkdir -p `dirname "$@"`
-	@gcj -c $(CFLAGS) $(OPENSSL_CNI_CFLAGS) $(JAVA_SRC) -o $@
+	@gcj -c $(CFLAGS) $(OPENSSL_CNI_CFLAGS) $(JNANOWEB_CNI_CFLAGS) $(JAVA_SRC) -o $@
 
 $(TEST_EXECUTABLE): $(TEST_MAIN_OBJECT)
 	@mkdir -p `dirname "$@"`
-	@gcj $< $(OPENSSL_CNI_LIBS) --main=$(TEST_MAIN_CLASS) -o $@
+	@gcj $< $(OPENSSL_CNI_LIBS) $(JNANOWEB_CNI_LIBS) --main=$(TEST_MAIN_CLASS) -o $@
 
 clean:
 	@rm -Rf tmp classes $(TEST_EXECUTABLE) $(TEST_MAIN_OBJECT)
