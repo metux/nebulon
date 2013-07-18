@@ -1,6 +1,6 @@
 package de.metux.nebulon.crypt;
 
-import de.metux.nebulon.util.GZip;
+import de.metux.nebulon.util.Zip;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import javax.crypto.Cipher;
@@ -16,8 +16,8 @@ public class Crypt {
 			throw new GeneralSecurityException("null content");
 
 		/** transparent content compression **/
-		if (ciphertype.endsWith("@GZ"))
-			return encrypt(ciphertype.substring(0,ciphertype.length()-3),key,GZip.compress(content));
+		if (ciphertype.endsWith("@Z"))
+			return encrypt(ciphertype.substring(0,ciphertype.length()-2),key,Zip.compress(content));
 
 		/** OpenSSL-based AES-256 **/
 		if (ciphertype.equals("@AES256"))
@@ -41,8 +41,8 @@ public class Crypt {
 		if (content == null)
 			throw new GeneralSecurityException("null content");
 
-		if (ciphertype.endsWith("@GZ"))
-			return GZip.uncompress(decrypt(ciphertype.substring(0,ciphertype.length()-3),key,content));
+		if (ciphertype.endsWith("@Z"))
+			return Zip.uncompress(decrypt(ciphertype.substring(0,ciphertype.length()-2),key,content));
 
 		/** OpenSSL-based AES-256 **/
 		if (ciphertype.equals("@AES256"))

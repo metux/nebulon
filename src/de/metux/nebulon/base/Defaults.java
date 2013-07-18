@@ -6,7 +6,7 @@ public class Defaults {
 
 	// OpenSSL-based AES-256
 //	public static final String crypt_ciphertype = "@AES256";
-	public static final String crypt_ciphertype = "@AES256@GZ";	// with GZip cleartext compression
+	public static final String crypt_ciphertype = "@AES256@Z";	// with GZip cleartext compression
 
 	// No encryption -- just for testing
 //	public static final String crypt_ciphertype= "@NULL";
@@ -17,5 +17,8 @@ public class Defaults {
 
 	// log timings for cryptstore
 	public static final boolean cryptstore_timing = false;
+
 	public static final boolean cryptstore_debug = false;
+
+	public static final boolean zip_debug = false;
 }

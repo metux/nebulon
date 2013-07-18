@@ -27,7 +27,7 @@ public class FilesystemBlockStore implements IBlockStore {
 		String s2 = FileIO.byteArray2Hex(score.key);
 
 		while (s2.length() > 4) {
-			path += "/"+s2.substring(0,3);
+			path += "/"+s2.substring(0,4);
 			s2 = s2.substring(4);
 		}
 
