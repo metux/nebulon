@@ -12,16 +12,33 @@ import java.io.RandomAccessFile;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Simple filesystem-based block store:
+ * stores each block in a separate file (possibly ZIP compressed),
+ * leading parts of the score (string representation) are used for forming directory name
+ */
 public class FilesystemBlockStore implements IBlockStore {
 
 	private String root;
 	private boolean compress;
 
+	/**
+	 * Constructor: by root directory and compression flag
+	 *
+	 * @param	r	root directory of the store in the hosts filesystem
+	 * @param	c	true if new blocks should be ZIP compressed
+	 */
 	public FilesystemBlockStore(String r, boolean c) {
 		root = r;
 		compress = c;
 	}
 
+	/**
+	 * compute block filename prefix by score
+	 *
+	 * @param	score	score to compute filename from
+	 * @result	local block filename prefix
+	 */
 	private String _blockpath(Score score) {
 		String path = root+"/"+score.keytype;
 		String s2 = FileIO.byteArray2Hex(score.key);
@@ -34,20 +51,45 @@ public class FilesystemBlockStore implements IBlockStore {
 		return path+"/"+s2;
 	}
 
+	/**
+	 * compute block filename for gzip compressed blocks
+	 *
+	 * @param	score	score to compute filename from
+	 * @result	local block filename
+	 */
 	private String getGZipBlockPathname(Score score) {
 		return _blockpath(score)+".gz";
 	}
 
+	/**
+	 * compute block filename for uncompressed blocks
+	 *
+	 * @param	score	score to compute filename from
+	 * @result	local block filename
+	 */
 	private String getBlockPathname(Score score) {
 		return _blockpath(score)+".bin";
 	}
 
+	/**
+	 * load block by given score
+	 *
+	 * @param	score	score of the block to be loaded
+	 * @result	byte array with the block data - null if block not found
+	 * @throws	java.io.IOException
+	 */
 	public byte[] get(Score score) throws IOException {
 		byte[] data = get_raw(score);
 		return ((data == null) ? get_gzip(score) : data);
 	}
 
-	/* get a data block -- including payload */
+	/**
+	 * load an uncompressed/raw block by score
+	 *
+	 * @param	score	score of the block to be loaded
+	 * @result	byte array with the block data - null if block not found
+	 * @throws	java.io.IOException
+	 */
 	private byte[] get_raw(Score score) throws IOException {
 		try {
 			RandomAccessFile f = new RandomAccessFile(getBlockPathname(score), "r");
@@ -59,7 +101,13 @@ public class FilesystemBlockStore implements IBlockStore {
 		}
 	}
 
-	/* get a data block -- including payload */
+	/**
+	 * load an gzip-compressed block by score
+	 *
+	 * @param	score	score of the block to be loaded
+	 * @result	byte array with the block data - null if block not found
+	 * @throws	java.io.IOException
+	 */
 	private byte[] get_gzip(Score score) throws IOException {
 		try {
 			return FileIO.readBytes(new GZIPInputStream(new FileInputStream(getGZipBlockPathname(score))));
@@ -68,6 +116,13 @@ public class FilesystemBlockStore implements IBlockStore {
 		}
 	}
 
+	/**
+	 * store data block with gzip compression
+	 *
+	 * @param	content	byte array of data to be stored
+	 * @result	score of the stored block
+	 * @throws	java.io.IOException
+	 */
 	private Score put_gzip(byte[] content) throws IOException {
 		Score score = Score.compute(content);
 		String filename = getGZipBlockPathname(score);
@@ -91,7 +146,13 @@ public class FilesystemBlockStore implements IBlockStore {
 		return score;
 	}
 
-	/* store a block with associated data - no key generation/checking */
+	/**
+	 * store a block without compression
+	 *
+	 * @param	content	byte array of data to be stored
+	 * @result	score of the stored block
+	 * @throws	java.io.IOException
+	 */
 	private Score put_raw(byte[] content) throws IOException {
 		Score score = Score.compute(content);
 		String filename = getBlockPathname(score);
@@ -115,11 +176,24 @@ public class FilesystemBlockStore implements IBlockStore {
 		return score;
 	}
 
+	/**
+	 * store a block - decides compression on configuration (variable: compress)
+	 *
+	 * @param	data	data to be stored
+	 * @result		Score of the stored block
+	 * @throws	java.io.IOException
+	 */
 	public Score put(byte[] data) throws IOException {
 		return (compress ? put_gzip(data) : put_raw(data));
 	}
 
-	/* delete a block */
+	/**
+	 * delete a block from the store
+	 *
+	 * @param	score	score of the object to be deleted
+	 * @result		true when object was present and had been deleted
+	 * @throws	java.io.IOException
+	 */
 	public boolean delete(Score score) throws IOException {
 		/** trick to defeat shortcut evaluation */
 		boolean raw = new File(getBlockPathname(score)).delete();

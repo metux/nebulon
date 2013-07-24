@@ -7,16 +7,39 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.File;
 
+/**
+ * Collection of helpers
+ */
 public class FileIO {
 
+	/**
+	 * create directory hierachy to the given filename
+	 * similar to shell command: mkdir -p `basename $filename`
+	 *
+	 * @param	filename	filename to compute pathname from
+	 * @result			true if directories had been created
+	 */
 	public static final boolean createFilePath(String filename) {
 		return new File(filename).getParentFile().mkdirs();
 	}
 
+	/**
+	 * create directory hierachy to the given File object
+	 *
+	 * @param	f		File object holding the filename
+	 * @result			true if directories had been created
+	 */
 	public static final boolean createFilePath(File f) {
 		return f.getParentFile().mkdirs();
 	}
 
+	/**
+	 * read all available input bytes from input stream into byte array
+	 *
+	 * @param	in		input stream to read from
+	 * @result			byte array holding the read data
+	 * @throws	java.io.IOException
+	 */
 	public static final byte[] readBytes(InputStream in)
 	throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -31,6 +54,12 @@ public class FileIO {
 		return b;
 	}
 
+	/**
+	 * load binary file into byte array
+	 *
+	 * @param	filename	name of the file to be loaded
+	 * @result			byte array with loaded data - null if failed
+	 */
 	public static final byte[] loadBinaryFile(String name) {
 		try {
 			DataInputStream dis = new DataInputStream(new FileInputStream(name));
@@ -45,6 +74,12 @@ public class FileIO {
 
 	final static char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
+	/**
+	 * convert byte array to hex string
+	 *
+	 * @param	bytes	byte array to be converted
+	 * @result		hex representation of the given byte array
+	 */
 	public static final String byteArray2Hex(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];
 		int v;
@@ -56,6 +91,12 @@ public class FileIO {
 		return new String(hexChars);
 	}
 
+	/**
+	 * convert a single byte to hex string representation
+	 *
+	 * @param	b	byte to be converted to hex string
+	 * @result		hex representation of the given byte
+	 */
 	public static final String toHex(byte b) {
 		char[] hexChars = new char[2];
 		int v;
@@ -65,6 +106,12 @@ public class FileIO {
 		return new String(hexChars);
 	}
 
+	/**
+	 * convert hex string to byte array
+	 *
+	 * @param	s	hex string representation to be converted
+	 * @result		converted byte array
+	 */
 	public static byte[] hexStringToByteArray(String s) {
 		int len = s.length();
 		byte[] data = new byte[len / 2];

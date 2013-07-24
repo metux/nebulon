@@ -10,8 +10,18 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
+/**
+ * simple ZIP compression (deflate/inflate)
+ */
 public class Zip {
 
+	/**
+	 * compress a byte array
+	 *
+	 * @param	data	byte array to be compressed
+	 * @result	compressed data as byte array
+	 * @throws	java.io.IOException
+	 */
 	public static final byte[] compress(byte[] data) throws IOException {
 		ByteArrayOutputStream byteout = new ByteArrayOutputStream();
 		DeflaterOutputStream zip = new DeflaterOutputStream(byteout, new Deflater(Defaults.zip_level));
@@ -25,6 +35,13 @@ public class Zip {
 		return compressed;
 	}
 
+	/**
+	 * decompress a byte array
+	 *
+	 * @param	data	byte array of compressed data
+	 * @result	uncompressed data as byte array
+	 * @throws	java.io.IOException
+	 */
 	public static final byte[] uncompress(byte[] data) throws IOException {
 		return FileIO.readBytes(new InflaterInputStream(new ByteArrayInputStream(data)));
 	}

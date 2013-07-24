@@ -1,5 +1,8 @@
 package de.metux.nebulon.util;
 
+/**
+ * Logging helper: currently just writes out to stderr
+ */
 public class Log {
 
 	public static final void debug(String text) {

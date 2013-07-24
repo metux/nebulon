@@ -3,6 +3,10 @@ package de.metux.nebulon.base;
 import de.metux.nebulon.util.FileIO;
 import java.io.IOException;
 
+/**
+ * Exception: block integrity failed - raised when a block's score doesnt match the data,
+ * eg. when storage corrupted or (encrypted) blocks had been tampered with
+ */
 public class BlockIntegrityException extends IOException {
 
 	byte[] got_key;

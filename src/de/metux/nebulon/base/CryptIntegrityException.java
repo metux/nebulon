@@ -3,6 +3,9 @@ package de.metux.nebulon.base;
 import de.metux.nebulon.util.FileIO;
 import java.io.IOException;
 
+/**
+ * Exception: integrity check of encrypted block/file failed
+ */
 public class CryptIntegrityException extends IOException {
 
 	byte[] got_key;

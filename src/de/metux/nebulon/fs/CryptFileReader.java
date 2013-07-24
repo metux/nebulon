@@ -15,6 +15,17 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 
+/**
+ * Read an encrypted file of type: cryptfile/1
+ *
+ * All data blocks are written out to a CryptBlockStore, references to the blocks are collected
+ * as BlockList tree (using BlockRefWriter), their encryption keys are stored in one large
+ * encrypted keylist block. Finally, an CryptFileHeader block is written, pointing to the
+ * blocklist root and keylist block.
+ *
+ * The returned CryptScore has special semantics: score field is pointing to the CryptFileBlock,
+ * while key field holds the encryption key of the encrypted keylist block
+ */
 public class CryptFileReader {
 
 	ICryptBlockStore cryptblockstore;
@@ -24,6 +35,12 @@ public class CryptFileReader {
 	ArrayList<Score> scores = new ArrayList<Score>();
 	int count;
 
+	/**
+	 * load an BlockRef entry
+	 *
+	 * @param	ref	BlockRef object to be loaded
+	 * @throws	java.io.IOException
+	 */
 	void load_blockref_entry(BlockRef ref) throws IOException {
 		if (ref.type.equals(BlockRef.type_blocklist)) {
 			load_blockref_list(ref.score);
@@ -34,6 +51,12 @@ public class CryptFileReader {
 		}
 	}
 
+	/**
+	 * load an blocklist block by given score
+	 *
+	 * @param	score	score of the blocklist block to load
+	 * @throws	java.io.IOException
+	 */
 	void load_blockref_list(Score score) throws IOException {
 		byte[] data = blockstore.get(score);
 		if (data == null)
@@ -45,6 +68,12 @@ public class CryptFileReader {
 			load_blockref_entry(BlockRef.parse(line));
 	}
 
+	/**
+	 * load keylist block from given score and decrypt it using key from our global CryptScore
+	 *
+	 * @param	score	score of the keylist block to be loaded
+	 * @throws	java.io.IOException, java.security.GeneralSecurityException
+	 */
 	void load_key_list(Score score) throws IOException, GeneralSecurityException {
 		byte[] data = cryptblockstore.get(new CryptScore(score,rootkey));
 		if (data == null)
@@ -56,6 +85,13 @@ public class CryptFileReader {
 			keys.add(CryptKey.parse(line));
 	}
 
+	/**
+	 * process an header entry
+	 *
+	 * @param	name	header name
+	 * @param	value	header value
+	 * @throws	java.io.IOException, java.security.GeneralSecurityException
+	 */
 	void hdrValue(String name, String value) throws IOException, GeneralSecurityException {
 		if (name.equals("Class")) {
 			if (!value.equals("cryptfile/1"))
@@ -69,6 +105,12 @@ public class CryptFileReader {
 		}
 	}
 
+	/**
+	 * process/parse header line
+	 *
+	 * @param	line	header line
+	 * @throws	java.io.IOException, java.security.GeneralSecurityException
+	 */
 	void hdrLine(String line) throws IOException, GeneralSecurityException {
 		int pos = line.indexOf(":");
 		if (pos < 1)
@@ -87,6 +129,15 @@ public class CryptFileReader {
 		hdrValue(hdr, line.substring(pos));
 	}
 
+	/**
+	 * Constructor: using BlockStore, CryptBlockScore, CryptScore
+	 *
+	 * @param	bs	blockstore to read unencrypted from
+	 * @param	cbs	encrypted blockstore to read encrypted data from
+	 * @param	cs	CryptScore to be used: score field points to the file header,
+	 *			while key field is the encryption key of the keylist block
+	 * @throws	java.io.IOException, java.security.GeneralSecurityException
+	 */
 	public CryptFileReader(IBlockStore bs, ICryptBlockStore cbs, CryptScore cs) throws IOException, GeneralSecurityException {
 		cryptblockstore = cbs;
 		blockstore = bs;
@@ -105,6 +156,12 @@ public class CryptFileReader {
 			throw new IOException("key count mismatch: dblocks="+scores.size()+" keys="+keys.size());
 	}
 
+	/**
+	 * read an decrypt the next data block, until no more blocks present
+	 *
+	 * @result	decrypted data block
+	 * @throws	IOException, GeneralSecurityException
+	 */
 	public byte[] read() throws IOException, GeneralSecurityException {
 		if (count == scores.size())
 			return null;
